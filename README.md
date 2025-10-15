@@ -194,7 +194,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ## 📞 Soporte
 
 Para soporte técnico o preguntas sobre el proyecto, contacta a:
-- **Email**: [tu-email@ejemplo.com]
+- **Email**: [aranoherrera92@gmail.com]
 - **GitHub Issues**: [Crear un issue](https://github.com/FLAranoHerrera/sushi-pos-frontend/issues)
 
 ## 🙏 Agradecimientos
