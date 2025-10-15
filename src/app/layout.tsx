@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
   description: 'Sistema de punto de venta completo para restaurantes de sushi. Gestión de productos, órdenes, pagos y usuarios con interfaz moderna y responsiva.',
   keywords: ['POS', 'punto de venta', 'sushi', 'restaurante', 'gestión', 'Next.js', 'TypeScript'],
-  authors: [{ name: 'FLAranoHerrera', email: 'aranoherrera92@gmail.com' }],
+  authors: [{ name: 'FLAranoHerrera' }],
   creator: 'FLAranoHerrera',
   publisher: 'SushiPOS',
   formatDetection: {
