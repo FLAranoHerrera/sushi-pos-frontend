@@ -28,7 +28,8 @@ api.interceptors.request.use((config) => {
   
   // Debug: Log de la URL completa en desarrollo
   if (process.env.NODE_ENV === 'development') {
-    console.log('🚀 Making request to:', config.baseURL + config.url)
+    const fullUrl = (config.baseURL || '') + (config.url || '')
+    console.log('🚀 Making request to:', fullUrl)
   }
   
   return config
