@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Product, OrderItem, CreateOrderDto, PaymentMethod } from '@/types'
 import { productsService } from '@/services/products.service'
 import { ordersService } from '@/services/orders.service'
+import { getImageUrl } from '@/lib/api'
 import { Utensils, Plus, Minus, ShoppingCart } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
@@ -24,13 +25,8 @@ export default function POSPage() {
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
 
-  const getImageUrl = (product: Product) => {
-    if (product.imageUrl) {
-      return product.imageUrl.startsWith('http') 
-        ? product.imageUrl 
-        : `https://sushi-pos-backend.onrender.com${product.imageUrl}`
-    }
-    return null
+  const getProductImageUrl = (product: Product) => {
+    return getImageUrl(product.imageUrl || '')
   }
 
   useEffect(() => {
@@ -206,10 +202,10 @@ export default function POSPage() {
                           <div className="flex gap-4">
                             {/* Imagen del producto */}
                             <div className="flex-shrink-0">
-                              {getImageUrl(product) ? (
+                              {getProductImageUrl(product) ? (
                                 <div className="relative w-16 h-16 rounded-lg overflow-hidden">
                                   <Image
-                                    src={getImageUrl(product)!}
+                                    src={getProductImageUrl(product)!}
                                     alt={product.name}
                                     fill
                                     className="object-cover"

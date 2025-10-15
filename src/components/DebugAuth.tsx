@@ -27,7 +27,10 @@ export default function SystemStatus() {
   const checkBackendStatus = async () => {
     setBackendStatus('checking')
     try {
-      const response = await fetch('https://sushi-pos-backend.onrender.com/api', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sushi-pos-backend.onrender.com'
+      const BASE_URL = API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`
+      
+      const response = await fetch(`${BASE_URL}/health`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

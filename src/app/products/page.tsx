@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Utensils, ArrowLeft, Package, Plus, Edit, Trash2, Search, Image as ImageIcon, X } from 'lucide-react'
 import { Product, Category } from '@/types'
 import { productsService } from '@/services/products.service'
+import { getImageUrl } from '@/lib/api'
 import Image from 'next/image'
 
 export default function ProductsPage() {
@@ -254,13 +255,8 @@ export default function ProductsPage() {
     setShowEditForm(true)
   }
 
-  const getImageUrl = (product: Product) => {
-    if (product.imageUrl) {
-      return product.imageUrl.startsWith('http') 
-        ? product.imageUrl 
-        : `https://sushi-pos-backend.onrender.com${product.imageUrl}`
-    }
-    return null
+  const getProductImageUrl = (product: Product) => {
+    return getImageUrl(product.imageUrl || '')
   }
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -682,7 +678,7 @@ export default function ProductsPage() {
             </div>
           ) : (
             filteredProducts.map((product) => {
-              const imageUrl = getImageUrl(product)
+              const imageUrl = getProductImageUrl(product)
               
               return (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow overflow-hidden">
