@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRole } from '@/hooks/useRole'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { 
@@ -39,7 +39,7 @@ export default function SystemStatus() {
       } else {
         setBackendStatus('offline')
       }
-    } catch (error) {
+    } catch {
       setBackendStatus('offline')
     }
     setLastChecked(new Date())

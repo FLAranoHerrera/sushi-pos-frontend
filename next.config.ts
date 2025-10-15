@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
   // Configuración para Vercel
   output: 'standalone',
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
   },
   // Headers de seguridad
   async headers() {
