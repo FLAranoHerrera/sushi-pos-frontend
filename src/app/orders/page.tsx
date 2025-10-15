@@ -557,12 +557,12 @@ export default function OrdersPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal:</span>
-                    <span>${Number(selectedOrder.subtotal).toFixed(2)}</span>
+                    <span>${Number(selectedOrder.total - selectedOrder.tip).toFixed(2)}</span>
                   </div>
-                  {selectedOrder.tax > 0 && (
+                  {selectedOrder.tip > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Impuestos:</span>
-                      <span>${Number(selectedOrder.tax).toFixed(2)}</span>
+                      <span className="text-gray-600">Propina:</span>
+                      <span>${Number(selectedOrder.tip).toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-lg">
