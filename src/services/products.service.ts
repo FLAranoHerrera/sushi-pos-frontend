@@ -68,7 +68,7 @@ export const productsService = {
     console.log('Token available:', !!localStorage.getItem('token'))
     
     // Filtrar campos que el backend no acepta para actualización
-    const { categoryId, id, createdAt, updatedAt, category, file, image, ...allowedFields } = productData
+    const { categoryId, id: productId, createdAt, updatedAt, category, file, image, ...allowedFields } = productData
     console.log('Filtered data (removed categoryId, id, timestamps, category, file, image):', allowedFields)
     
     try {
