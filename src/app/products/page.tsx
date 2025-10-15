@@ -74,7 +74,7 @@ export default function ProductsPage() {
       console.log('Categories response:', response)
 
       // Verificar si la respuesta es un array o tiene una propiedad data
-      const categoriesData = Array.isArray(response) ? response : ((response as any).data || (response as any).categories || [])
+      const categoriesData = Array.isArray(response) ? response : ((response as { data?: unknown; categories?: unknown }).data || (response as { categories?: unknown }).categories || [])
 
       // Asegurar que sea un array
       if (Array.isArray(categoriesData)) {
@@ -133,10 +133,10 @@ export default function ProductsPage() {
         try {
           await productsService.uploadProductImage(createdProduct.id, newProduct.image)
           console.log('Image uploaded successfully')
-        } catch (imageError: any) {
+        } catch (imageError: unknown) {
           console.error('Error uploading image:', imageError)
           // No fallar la creación completa si solo falla la imagen
-          alert(`Producto creado, pero hubo un error al subir la imagen: ${imageError.message}`)
+          alert(`Producto creado, pero hubo un error al subir la imagen: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`)
         } finally {
           setUploadingImage(false)
         }
@@ -148,7 +148,7 @@ export default function ProductsPage() {
       setImagePreview(null)
       
       alert('Producto creado exitosamente')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating product:', error)
       console.error('Error details:', error.response?.data || error.message)
       alert(`Error al crear el producto: ${error.response?.data?.message || error.message}`)
@@ -203,10 +203,10 @@ export default function ProductsPage() {
         try {
           await productsService.updateProductImage(editingProduct.id, newProduct.image)
           console.log('Image updated successfully')
-        } catch (imageError: any) {
+        } catch (imageError: unknown) {
           console.error('Error updating image:', imageError)
           // No fallar la actualización completa si solo falla la imagen
-          alert(`Producto actualizado, pero hubo un error al subir la imagen: ${imageError.message}`)
+          alert(`Producto actualizado, pero hubo un error al subir la imagen: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`)
         } finally {
           setUploadingImage(false)
         }
@@ -219,7 +219,7 @@ export default function ProductsPage() {
       setImagePreview(null)
       
       alert('Producto actualizado exitosamente')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating product:', error)
       console.error('Error details:', error.response?.data || error.message)
       alert(`Error al actualizar el producto: ${error.response?.data?.message || error.message}`)

@@ -1,6 +1,29 @@
 import api from '@/lib/api'
 import { Product, Category, Subcategory, Extra } from '@/types'
 
+// Interfaces para los DTOs
+interface CreateProductDto {
+  name: string
+  description?: string
+  price: number
+  stock: number
+  categoryId?: string
+  subcategoryId?: string
+  isActive?: boolean
+  image?: File
+}
+
+interface UpdateProductDto {
+  name?: string
+  description?: string
+  price?: number
+  stock?: number
+  categoryId?: string
+  subcategoryId?: string
+  isActive?: boolean
+  image?: File
+}
+
 export const productsService = {
   async getProducts(): Promise<Product[]> {
     const response = await api.get('/products?limit=100')
@@ -27,7 +50,7 @@ export const productsService = {
     return response.data
   },
 
-  async createProduct(productData: any): Promise<Product> {
+  async createProduct(productData: CreateProductDto): Promise<Product> {
     console.log('Creating product with data:', productData)
     
     // Filtrar campos que el backend no acepta para creación
@@ -39,7 +62,7 @@ export const productsService = {
     return response.data
   },
 
-  async updateProduct(id: string, productData: any): Promise<Product> {
+  async updateProduct(id: string, productData: UpdateProductDto): Promise<Product> {
     console.log(`Updating product ${id} with data:`, productData)
     console.log('Full URL:', `${api.defaults.baseURL}/products/${id}`)
     console.log('Token available:', !!localStorage.getItem('token'))
@@ -53,14 +76,14 @@ export const productsService = {
       const response = await api.patch(`/products/${id}`, allowedFields)
       console.log('Update response (PATCH):', response.data)
       return response.data
-    } catch (patchError: any) {
+    } catch (patchError: unknown) {
       console.log('PATCH failed, trying PUT...')
       try {
         // Si PATCH falla, intentar con PUT
         const response = await api.put(`/products/${id}`, allowedFields)
         console.log('Update response (PUT):', response.data)
         return response.data
-      } catch (putError: any) {
+      } catch (putError: unknown) {
         console.error('Both PATCH and PUT failed:', {
           patchError: {
             status: patchError.response?.status,
@@ -114,8 +137,8 @@ export const productsService = {
       })
       console.log('Image upload response:', response.data)
       return response.data
-    } catch (error: any) {
-      console.error('Image upload error:', error.response?.data || error.message)
+    } catch (error: unknown) {
+      console.error('Image upload error:', error instanceof Error ? error.message : 'Unknown error')
       throw error
     }
   },
@@ -147,8 +170,8 @@ export const productsService = {
       })
       console.log('Image update response:', response.data)
       return response.data
-    } catch (error: any) {
-      console.error('Image update error:', error.response?.data || error.message)
+    } catch (error: unknown) {
+      console.error('Image update error:', error instanceof Error ? error.message : 'Unknown error')
       throw error
     }
   }

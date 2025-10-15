@@ -113,7 +113,7 @@ export default function UsersPage() {
 
       // Solo incluir password si se proporciona
       if (newUser.password.trim()) {
-        (userData as any).password = newUser.password
+        (userData as { password: string }).password = newUser.password
       }
 
       await authService.updateUser(editingUser.id, userData)
