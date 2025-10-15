@@ -69,8 +69,7 @@ api.interceptors.response.use(
 
 // Función para obtener la URL base del backend
 export const getBackendUrl = () => {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sushi-pos-backend.onrender.com'
-  return API_URL.endsWith('/api') ? API_URL.replace('/api', '') : API_URL
+  return process.env.NEXT_PUBLIC_API_URL || 'https://sushi-pos-backend.onrender.com/api'
 }
 
 // Función para construir URLs de imágenes
