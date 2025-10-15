@@ -142,7 +142,7 @@ export default function UsersPage() {
       email: user.email,
       password: '', // No pre-llenar password por seguridad
       phone: user.phone || '',
-      role: user.role
+      role: user.role as string
     })
     setShowEditForm(true)
   }

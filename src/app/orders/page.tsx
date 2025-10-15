@@ -105,27 +105,28 @@ export default function OrdersPage() {
     }
   }
 
-  const processCardPayment = async (orderId: string) => {
-    try {
-      // Para tarjeta, iniciar proceso de Stripe
-      alert('Iniciando proceso de pago con tarjeta...')
-      // TODO: Implementar integración con Stripe
-    } catch (error) {
-      console.error('Error processing card payment:', error)
-      alert('Error al procesar el pago con tarjeta')
-    }
-  }
+  // Funciones de pago temporalmente deshabilitadas
+  // const processCardPayment = async (orderId: string) => {
+  //   try {
+  //     // Para tarjeta, iniciar proceso de Stripe
+  //     alert('Iniciando proceso de pago con tarjeta...')
+  //     // TODO: Implementar integración con Stripe
+  //   } catch (error) {
+  //     console.error('Error processing card payment:', error)
+  //     alert('Error al procesar el pago con tarjeta')
+  //   }
+  // }
 
-  const processDigitalPayment = async (orderId: string) => {
-    try {
-      // Para pago digital, iniciar proceso de Stripe
-      alert('Iniciando proceso de pago digital...')
-      // TODO: Implementar integración con Stripe
-    } catch (error) {
-      console.error('Error processing digital payment:', error)
-      alert('Error al procesar el pago digital')
-    }
-  }
+  // const processDigitalPayment = async (orderId: string) => {
+  //   try {
+  //     // Para pago digital, iniciar proceso de Stripe
+  //     alert('Iniciando proceso de pago digital...')
+  //     // TODO: Implementar integración con Stripe
+  //   } catch (error) {
+  //     console.error('Error processing digital payment:', error)
+  //     alert('Error al procesar el pago digital')
+  //   }
+  // }
 
   const showOrderDetailsModal = (order: Order) => {
     setSelectedOrder(order)

@@ -54,7 +54,7 @@ export const productsService = {
     console.log('Creating product with data:', productData)
     
     // Filtrar campos que el backend no acepta para creación
-    const { id: productId, createdAt, updatedAt, category, file, image, ...allowedFields } = productData
+    const { id, createdAt, updatedAt, category, file, image, ...allowedFields } = productData
     console.log('Filtered data for creation (removed id, timestamps, category, file, image):', allowedFields)
     
     const response = await api.post('/products', allowedFields)
@@ -68,7 +68,7 @@ export const productsService = {
     console.log('Token available:', !!localStorage.getItem('token'))
     
     // Filtrar campos que el backend no acepta para actualización
-    const { categoryId, id: productId, createdAt, updatedAt, category, file, image, ...allowedFields } = productData
+    const { categoryId, id, createdAt, updatedAt, category, file, image, ...allowedFields } = productData
     console.log('Filtered data (removed categoryId, id, timestamps, category, file, image):', allowedFields)
     
     try {

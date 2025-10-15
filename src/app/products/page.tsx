@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Utensils, ArrowLeft, Package, Plus, Edit, Trash2, Search, Image as ImageIcon, Upload, X } from 'lucide-react'
+import { Utensils, ArrowLeft, Package, Plus, Edit, Trash2, Search, Image as ImageIcon, X } from 'lucide-react'
 import { Product, Category } from '@/types'
 import { productsService } from '@/services/products.service'
 import Image from 'next/image'
@@ -456,9 +456,11 @@ export default function ProductsPage() {
                     />
                     {imagePreview && (
                       <div className="mt-2 relative">
-                        <img 
+                        <Image 
                           src={imagePreview} 
                           alt="Preview" 
+                          width={128}
+                          height={128}
                           className="w-32 h-32 object-cover rounded-lg border"
                         />
                         <Button
@@ -596,9 +598,11 @@ export default function ProductsPage() {
                     />
                     {imagePreview && (
                       <div className="mt-2 relative">
-                        <img 
+                        <Image 
                           src={imagePreview} 
                           alt="Preview" 
+                          width={128}
+                          height={128}
                           className="w-32 h-32 object-cover rounded-lg border"
                         />
                         <Button

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Product, OrderItem, CreateOrderDto, PaymentMethod } from '@/types'
 import { productsService } from '@/services/products.service'
 import { ordersService } from '@/services/orders.service'
-import { Utensils, Plus, Minus, ShoppingCart, CreditCard, DollarSign, Smartphone } from 'lucide-react'
+import { Utensils, Plus, Minus, ShoppingCart } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
 export default function POSPage() {
@@ -117,7 +117,7 @@ export default function POSPage() {
         notes: notes || undefined
       }
 
-      const order = await ordersService.createOrder(orderData)
+      await ordersService.createOrder(orderData)
       
       // Limpiar carrito
       setCart([])
