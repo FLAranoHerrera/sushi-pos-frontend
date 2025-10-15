@@ -104,7 +104,7 @@ export default function UsersPage() {
     if (!editingUser) return
 
     try {
-      const userData = {
+      const userData: any = {
         name: newUser.name,
         email: newUser.email,
         phone: newUser.phone || undefined,
@@ -113,7 +113,7 @@ export default function UsersPage() {
 
       // Solo incluir password si se proporciona
       if (newUser.password.trim()) {
-        (userData as { password: string }).password = newUser.password
+        userData.password = newUser.password
       }
 
       await authService.updateUser(editingUser.id, userData)
