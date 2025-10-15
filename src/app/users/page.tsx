@@ -55,7 +55,7 @@ export default function UsersPage() {
       console.log('Users response:', response)
       
       // Verificar si la respuesta es un array o tiene una propiedad data
-      const usersData = Array.isArray(response) ? response : ((response as any).data || (response as any).users || [])
+      const usersData = Array.isArray(response) ? response : ((response as { data?: unknown; users?: unknown }).data || (response as { users?: unknown }).users || [])
       
       // Asegurar que sea un array
       if (Array.isArray(usersData)) {
