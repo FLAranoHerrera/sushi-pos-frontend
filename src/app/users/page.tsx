@@ -104,7 +104,13 @@ export default function UsersPage() {
     if (!editingUser) return
 
     try {
-      const userData: any = {
+      const userData: {
+        name: string;
+        email: string;
+        phone?: string;
+        role: string;
+        password?: string;
+      } = {
         name: newUser.name,
         email: newUser.email,
         phone: newUser.phone || undefined,
