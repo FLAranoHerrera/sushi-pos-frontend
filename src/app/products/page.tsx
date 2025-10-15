@@ -150,8 +150,9 @@ export default function ProductsPage() {
       alert('Producto creado exitosamente')
     } catch (error: unknown) {
       console.error('Error creating product:', error)
-      console.error('Error details:', error.response?.data || error.message)
-      alert(`Error al crear el producto: ${error.response?.data?.message || error.message}`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.error('Error details:', errorMessage)
+      alert(`Error al crear el producto: ${errorMessage}`)
     }
   }
 
@@ -221,8 +222,9 @@ export default function ProductsPage() {
       alert('Producto actualizado exitosamente')
     } catch (error: unknown) {
       console.error('Error updating product:', error)
-      console.error('Error details:', error.response?.data || error.message)
-      alert(`Error al actualizar el producto: ${error.response?.data?.message || error.message}`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.error('Error details:', errorMessage)
+      alert(`Error al actualizar el producto: ${errorMessage}`)
     }
   }
 
