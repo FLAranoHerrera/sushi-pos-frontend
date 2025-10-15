@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   },
   images: {
-    domains: ['sushi-pos-backend.onrender.com', 'res.cloudinary.com'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -23,6 +22,37 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  // Optimizaciones para producción
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: false,
+  // Configuración para Vercel
+  output: 'standalone',
+  experimental: {
+    optimizeCss: true,
+  },
+  // Headers de seguridad
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
   },
 };
 
