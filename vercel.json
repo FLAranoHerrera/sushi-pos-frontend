@@ -9,11 +9,6 @@
       "runtime": "nodejs18.x"
     }
   },
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@next_public_api_url",
-    "NEXT_PUBLIC_APP_URL": "@next_public_app_url",
-    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "@next_public_stripe_publishable_key"
-  },
   "headers": [
     {
       "source": "/(.*)",
