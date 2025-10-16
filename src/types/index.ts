@@ -163,3 +163,44 @@ export interface OrderStats {
   pendingOrders: number
   totalRevenue: number
 }
+
+// Attendance Types
+export interface AttendanceRecord {
+  id: string
+  employeeId: string
+  date: string
+  checkIn?: string | null
+  checkOut?: string | null
+  workedHours?: number | null
+  status: 'on_time' | 'late' | 'absent' | 'extra_hours'
+  notes?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AttendanceStats {
+  totalDays: number
+  workedDays: number
+  lateDays: number
+  absentDays: number
+  totalHours: number
+  averageHoursPerDay: number
+}
+
+export interface WorkSchedule {
+  id: string
+  employeeId: string
+  startTime: string
+  endTime: string
+  daysOfWeek: number[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AttendanceReport {
+  employeeId: string
+  employeeName: string
+  records: AttendanceRecord[]
+  stats: AttendanceStats
+}

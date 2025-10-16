@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Utensils, ShoppingCart, Users, DollarSign, TrendingUp, LogOut, Settings, Package } from 'lucide-react'
+import { Utensils, ShoppingCart, Users, DollarSign, TrendingUp, LogOut, Settings, Package, Clock } from 'lucide-react'
 import { OrderStats } from '@/types'
 import { ordersService } from '@/services/orders.service'
 import SystemStatus from '@/components/SystemStatus'
@@ -174,7 +174,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* POS - Disponible para ADMIN y MESERO */}
           {canAccessPOS && (
             <Card className="hover:shadow-lg transition-shadow cursor-pointer"
@@ -233,6 +233,46 @@ export default function DashboardPage() {
               <CardContent>
                 <Button variant="outline" className="w-full">
                   {isAdmin ? 'Gestionar Menú' : 'Ver Menú'}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Asistencia - Disponible para todos los empleados */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => router.push('/attendance')}>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Clock className="h-5 w-5 mr-2 text-blue-600" />
+                Mi Asistencia
+              </CardTitle>
+              <CardDescription>
+                Registrar entrada y salida, ver historial
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full">
+                Ver Mi Asistencia
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Asistencia Admin - Solo para administradores */}
+          {canManageUsers && (
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => router.push('/attendance/admin')}>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-purple-600" />
+                  Asistencia de Empleados
+                </CardTitle>
+                <CardDescription>
+                  Supervisar asistencia de todos los empleados
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="outline" className="w-full">
+                  Ver Todos los Empleados
                 </Button>
               </CardContent>
             </Card>

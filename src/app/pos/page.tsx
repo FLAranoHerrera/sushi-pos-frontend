@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
+import { useRole } from '@/hooks/useRole'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +17,7 @@ import { formatCurrency } from '@/lib/utils'
 
 export default function POSPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth()
+  const { canAccessPOS } = useRole()
   const router = useRouter()
   
   const [products, setProducts] = useState<Product[]>([])
@@ -39,6 +41,11 @@ export default function POSPage() {
       return
     }
 
+    if (!canAccessPOS) {
+      router.push('/dashboard')
+      return
+    }
+
     const loadProducts = async () => {
       try {
         const data = await productsService.getProducts()
@@ -51,7 +58,7 @@ export default function POSPage() {
     }
 
     loadProducts()
-  }, [isAuthenticated, authLoading, router])
+  }, [isAuthenticated, authLoading, canAccessPOS, router])
 
   const addToCart = (product: Product) => {
     const existingItem = cart.find(item => item.product.id === product.id)
