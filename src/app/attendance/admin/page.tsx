@@ -1,23 +1,39 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRole } from '@/hooks/useRole'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Users, Clock, CheckCircle, XCircle, Calendar, Download, Filter } from 'lucide-react'
+import { ArrowLeft, Users, Clock, CheckCircle, XCircle, Calendar, Download, Filter, RefreshCw } from 'lucide-react'
 import { AttendanceRecord } from '@/types'
 import { attendanceService } from '@/services/attendanceService'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 export default function AttendanceAdminPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const { isAdmin } = useRole()
+  const { handleError, error, clearError } = useErrorHandler()
   const [allRecords, setAllRecords] = useState<AttendanceRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const router = useRouter()
+
+  const loadAttendanceByDate = useCallback(async (date: string) => {
+    try {
+      setLoading(true)
+      clearError()
+      const data = await attendanceService.getAttendanceByDate(date)
+      setAllRecords(data)
+    } catch (err) {
+      handleError(err, 'cargar asistencia por fecha')
+    } finally {
+      setLoading(false)
+    }
+  }, [handleError, clearError])
 
   useEffect(() => {
     if (authLoading) {
@@ -34,58 +50,17 @@ export default function AttendanceAdminPage() {
       return
     }
 
-    loadAllAttendance()
-  }, [isAuthenticated, authLoading, router, isAdmin])
+    loadAttendanceByDate(selectedDate)
+  }, [isAuthenticated, authLoading, router, isAdmin, loadAttendanceByDate, selectedDate])
 
-  const loadAllAttendance = async () => {
-    try {
-      setLoading(true)
-      // Simular datos de todos los empleados
-      const mockData: AttendanceRecord[] = [
-        {
-          id: '1',
-          employeeId: 'emp-001',
-          date: selectedDate,
-          checkIn: '2025-10-16T08:00:00Z',
-          checkOut: '2025-10-16T17:00:00Z',
-          workedHours: 9,
-          status: 'on_time',
-          notes: 'Jornada completa',
-          createdAt: '2025-10-16T08:00:00Z',
-          updatedAt: '2025-10-16T17:00:00Z'
-        },
-        {
-          id: '2',
-          employeeId: 'emp-002',
-          date: selectedDate,
-          checkIn: '2025-10-16T08:15:00Z',
-          checkOut: null,
-          workedHours: null,
-          status: 'late',
-          notes: 'Llegó tarde',
-          createdAt: '2025-10-16T08:15:00Z',
-          updatedAt: '2025-10-16T08:15:00Z'
-        },
-        {
-          id: '3',
-          employeeId: 'emp-003',
-          date: selectedDate,
-          checkIn: null,
-          checkOut: null,
-          workedHours: null,
-          status: 'absent',
-          notes: 'Ausente sin aviso',
-          createdAt: '2025-10-16T00:00:00Z',
-          updatedAt: '2025-10-16T00:00:00Z'
-        }
-      ]
-      setAllRecords(mockData)
-    } catch (error) {
-      console.error('Error loading attendance data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleDateChange = useCallback((newDate: string) => {
+    setSelectedDate(newDate)
+    loadAttendanceByDate(newDate)
+  }, [loadAttendanceByDate])
+
+  const handleRefresh = useCallback(() => {
+    loadAttendanceByDate(selectedDate)
+  }, [loadAttendanceByDate, selectedDate])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -117,14 +92,30 @@ export default function AttendanceAdminPage() {
     }
   }
 
-  const getEmployeeName = (employeeId: string) => {
+  const getEmployeeName = useCallback((employeeId: string) => {
     const names: { [key: string]: string } = {
       'emp-001': 'Juan Pérez',
       'emp-002': 'María García',
-      'emp-003': 'Carlos López'
+      'emp-003': 'Carlos López',
+      'b6db1bb0-7136-4ec6-b0ea-ab8460c2cacc': 'Usuario Actual'
     }
     return names[employeeId] || `Empleado ${employeeId}`
-  }
+  }, [])
+
+  // Memoizar estadísticas para mejor performance
+  const stats = useMemo(() => {
+    const totalEmployees = allRecords.length
+    const presentEmployees = allRecords.filter(r => r.checkIn).length
+    const lateEmployees = allRecords.filter(r => r.status === 'late').length
+    const absentEmployees = allRecords.filter(r => r.status === 'absent').length
+
+    return {
+      totalEmployees,
+      presentEmployees,
+      lateEmployees,
+      absentEmployees
+    }
+  }, [allRecords])
 
   if (authLoading) {
     return (
@@ -142,37 +133,38 @@ export default function AttendanceAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/attendance')}
-                className="mr-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver
-              </Button>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <div className="bg-purple-100 p-2 rounded-lg mr-3">
-                  <Users className="h-6 w-6 text-purple-600" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/attendance')}
+                  className="mr-4"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Volver
+                </Button>
+                <div className="flex items-center">
+                  <div className="bg-purple-100 p-2 rounded-lg mr-3">
+                    <Users className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h1 className="text-xl font-bold text-gray-900">Asistencia de Empleados</h1>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900">Asistencia de Empleados</h1>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  {user?.name} (👑 Administrador)
+                </span>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user?.name} (👑 Administrador)
-              </span>
-            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -198,15 +190,40 @@ export default function AttendanceAdminPage() {
                 <input
                   type="date"
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={(e) => handleDateChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                  aria-label="Seleccionar fecha para filtrar asistencia"
                 />
               </div>
-              <Button onClick={loadAllAttendance} className="w-full sm:w-auto">
-                <Calendar className="h-4 w-4 mr-2" />
-                Actualizar
+              <Button 
+                onClick={handleRefresh} 
+                className="w-full sm:w-auto"
+                disabled={loading}
+                aria-label="Actualizar datos de asistencia"
+              >
+                {loading ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Calendar className="h-4 w-4 mr-2" />
+                )}
+                {loading ? 'Cargando...' : 'Actualizar'}
               </Button>
             </div>
+            
+            {/* Manejo de errores */}
+            {error && (
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">{error}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearError}
+                  className="mt-2 text-red-600 hover:text-red-700"
+                >
+                  Cerrar
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -218,9 +235,9 @@ export default function AttendanceAdminPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{allRecords.length}</div>
+              <div className="text-2xl font-bold">{stats.totalEmployees}</div>
               <p className="text-xs text-muted-foreground">
-                Registrados hoy
+                Registrados el {new Date(selectedDate).toLocaleDateString('es-ES')}
               </p>
             </CardContent>
           </Card>
@@ -231,9 +248,7 @@ export default function AttendanceAdminPage() {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {allRecords.filter(r => r.checkIn).length}
-              </div>
+              <div className="text-2xl font-bold">{stats.presentEmployees}</div>
               <p className="text-xs text-muted-foreground">
                 Con entrada registrada
               </p>
@@ -246,9 +261,7 @@ export default function AttendanceAdminPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {allRecords.filter(r => r.status === 'late').length}
-              </div>
+              <div className="text-2xl font-bold">{stats.lateEmployees}</div>
               <p className="text-xs text-muted-foreground">
                 Llegaron tarde
               </p>
@@ -261,9 +274,7 @@ export default function AttendanceAdminPage() {
               <XCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {allRecords.filter(r => r.status === 'absent').length}
-              </div>
+              <div className="text-2xl font-bold">{stats.absentEmployees}</div>
               <p className="text-xs text-muted-foreground">
                 Sin registro
               </p>
@@ -336,5 +347,6 @@ export default function AttendanceAdminPage() {
         </Card>
       </main>
     </div>
+    </ErrorBoundary>
   )
 }

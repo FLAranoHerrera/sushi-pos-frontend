@@ -1,0 +1,19 @@
+# Global code owners
+* @FLAranoHerrera
+
+# Frontend specific files
+/src/ @FLAranoHerrera
+
+# Configuration files
+*.json @FLAranoHerrera
+*.js @FLAranoHerrera
+*.ts @FLAranoHerrera
+*.tsx @FLAranoHerrera
+
+# Documentation
+README.md @FLAranoHerrera
+CONTRIBUTING.md @FLAranoHerrera
+*.md @FLAranoHerrera
+
+# GitHub workflows
+/.github/ @FLAranoHerrera

@@ -22,6 +22,14 @@ export const attendanceService = {
     return response.data
   },
 
+  async getAttendanceByDate(date: string): Promise<AttendanceRecord[]> {
+    if (USE_MOCK) {
+      return attendanceServiceMock.getAttendanceByDate(date)
+    }
+    const response = await api.get(`/attendance/date/${date}`)
+    return response.data
+  },
+
   async registerCheckIn(employeeId: string): Promise<AttendanceRecord> {
     if (USE_MOCK) {
       return attendanceServiceMock.registerCheckIn(employeeId)

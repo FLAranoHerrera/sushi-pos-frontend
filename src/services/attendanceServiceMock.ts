@@ -2,6 +2,7 @@ import { AttendanceRecord, AttendanceStats } from '@/types'
 
 // Mock data para pruebas
 const mockAttendanceRecords: AttendanceRecord[] = [
+  // Datos para el usuario actual
   {
     id: '1',
     employeeId: 'b6db1bb0-7136-4ec6-b0ea-ab8460c2cacc',
@@ -37,6 +38,80 @@ const mockAttendanceRecords: AttendanceRecord[] = [
     notes: 'Horas extra por inventario',
     createdAt: '2025-10-13T08:00:00Z',
     updatedAt: '2025-10-13T19:00:00Z'
+  },
+  // Datos para otros empleados
+  {
+    id: '4',
+    employeeId: 'emp-001',
+    date: '2025-10-15',
+    checkIn: '2025-10-15T08:00:00Z',
+    checkOut: '2025-10-15T17:00:00Z',
+    workedHours: 9,
+    status: 'on_time',
+    notes: 'Jornada completa',
+    createdAt: '2025-10-15T08:00:00Z',
+    updatedAt: '2025-10-15T17:00:00Z'
+  },
+  {
+    id: '5',
+    employeeId: 'emp-002',
+    date: '2025-10-15',
+    checkIn: '2025-10-15T08:15:00Z',
+    checkOut: null,
+    workedHours: null,
+    status: 'late',
+    notes: 'Llegó tarde',
+    createdAt: '2025-10-15T08:15:00Z',
+    updatedAt: '2025-10-15T08:15:00Z'
+  },
+  {
+    id: '6',
+    employeeId: 'emp-003',
+    date: '2025-10-15',
+    checkIn: null,
+    checkOut: null,
+    workedHours: null,
+    status: 'absent',
+    notes: 'Ausente sin aviso',
+    createdAt: '2025-10-15T00:00:00Z',
+    updatedAt: '2025-10-15T00:00:00Z'
+  },
+  // Datos para fechas anteriores
+  {
+    id: '7',
+    employeeId: 'emp-001',
+    date: '2025-10-14',
+    checkIn: '2025-10-14T08:00:00Z',
+    checkOut: '2025-10-14T17:00:00Z',
+    workedHours: 9,
+    status: 'on_time',
+    notes: 'Jornada completa',
+    createdAt: '2025-10-14T08:00:00Z',
+    updatedAt: '2025-10-14T17:00:00Z'
+  },
+  {
+    id: '8',
+    employeeId: 'emp-002',
+    date: '2025-10-14',
+    checkIn: '2025-10-14T08:00:00Z',
+    checkOut: '2025-10-14T17:00:00Z',
+    workedHours: 9,
+    status: 'on_time',
+    notes: 'Jornada completa',
+    createdAt: '2025-10-14T08:00:00Z',
+    updatedAt: '2025-10-14T17:00:00Z'
+  },
+  {
+    id: '9',
+    employeeId: 'emp-003',
+    date: '2025-10-14',
+    checkIn: '2025-10-14T08:30:00Z',
+    checkOut: '2025-10-14T17:30:00Z',
+    workedHours: 9,
+    status: 'late',
+    notes: 'Llegó tarde por transporte',
+    createdAt: '2025-10-14T08:30:00Z',
+    updatedAt: '2025-10-14T17:30:00Z'
   }
 ]
 
@@ -141,6 +216,12 @@ export const attendanceServiceMock = {
       const end = new Date(endDate)
       return recordDate >= start && recordDate <= end
     })
+  },
+
+  async getAttendanceByDate(date: string): Promise<AttendanceRecord[]> {
+    await new Promise(resolve => setTimeout(resolve, 400))
+    
+    return mockAttendanceRecords.filter(record => record.date === date)
   },
 
   async exportAttendanceReport(startDate: string, endDate: string, format: 'csv' | 'pdf'): Promise<Blob> {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
@@ -14,22 +14,28 @@ import { ordersService } from '@/services/orders.service'
 import { getImageUrl } from '@/lib/api'
 import { Utensils, Plus, Minus, ShoppingCart } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import ProductCard from '@/components/ProductCard'
+import CartItem from '@/components/CartItem'
+import ErrorBoundary from '@/components/ErrorBoundary'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
+import { useProducts } from '@/hooks/useProducts'
 
 export default function POSPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const { canAccessPOS } = useRole()
   const router = useRouter()
+  const { handleError, error, clearError } = useErrorHandler()
+  const { products, loading, error: productsError, refetch } = useProducts()
   
-  const [products, setProducts] = useState<Product[]>([])
   const [cart, setCart] = useState<OrderItem[]>([])
   const [tableNumber, setTableNumber] = useState('')
   const [notes, setNotes] = useState('')
-  const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
 
-  const getProductImageUrl = (product: Product) => {
-    return getImageUrl(product.imageUrl || '')
-  }
+  // Memoizar productos disponibles
+  const availableProducts = useMemo(() => {
+    return products.filter(p => p.available)
+  }, [products])
 
   useEffect(() => {
     if (authLoading) {
@@ -45,68 +51,68 @@ export default function POSPage() {
       router.push('/dashboard')
       return
     }
-
-    const loadProducts = async () => {
-      try {
-        const data = await productsService.getProducts()
-        setProducts(data.filter(p => p.available))
-      } catch (error) {
-        console.error('Error loading products:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadProducts()
   }, [isAuthenticated, authLoading, canAccessPOS, router])
 
-  const addToCart = (product: Product) => {
-    const existingItem = cart.find(item => item.product.id === product.id)
-    
-    if (existingItem) {
-      setCart(cart.map(item => 
-        item.product.id === product.id 
-          ? { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.unitPrice }
-          : item
-      ))
-    } else {
-      const newItem: OrderItem = {
-        id: Math.random().toString(),
-        product,
-        quantity: 1,
-        unitPrice: Number(product.price),
-        subtotal: Number(product.price),
-        extras: [],
-        notes: ''
+  // Manejar errores de productos
+  useEffect(() => {
+    if (productsError) {
+      handleError(productsError, 'cargar productos')
+    }
+  }, [productsError, handleError])
+
+  const addToCart = useCallback((product: Product) => {
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.product.id === product.id)
+      
+      if (existingItem) {
+        return prevCart.map(item => 
+          item.product.id === product.id 
+            ? { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.unitPrice }
+            : item
+        )
+      } else {
+        const newItem: OrderItem = {
+          id: Math.random().toString(),
+          product,
+          quantity: 1,
+          unitPrice: Number(product.price),
+          subtotal: Number(product.price),
+          extras: [],
+          notes: ''
+        }
+        return [...prevCart, newItem]
       }
-      setCart([...cart, newItem])
-    }
-  }
+    })
+  }, [])
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      setCart(cart.filter(item => item.product.id !== productId))
-    } else {
-      setCart(cart.map(item => 
-        item.product.id === productId 
-          ? { ...item, quantity, subtotal: quantity * item.unitPrice }
-          : item
-      ))
-    }
-  }
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
+    setCart(prevCart => {
+      if (quantity <= 0) {
+        return prevCart.filter(item => item.product.id !== productId)
+      } else {
+        return prevCart.map(item => 
+          item.product.id === productId 
+            ? { ...item, quantity, subtotal: quantity * item.unitPrice }
+            : item
+        )
+      }
+    })
+  }, [])
 
-  const removeFromCart = (productId: string) => {
-    setCart(cart.filter(item => item.product.id !== productId))
-  }
+  const removeFromCart = useCallback((productId: string) => {
+    setCart(prevCart => prevCart.filter(item => item.product.id !== productId))
+  }, [])
 
-  const getTotal = () => {
+  const getTotal = useMemo(() => {
     return cart.reduce((sum, item) => sum + item.subtotal, 0)
-  }
+  }, [cart])
 
-  const processOrder = async () => {
+  const processOrder = useCallback(async () => {
     if (!user || cart.length === 0) return
 
     setProcessing(true)
+    clearError()
+    
     try {
       const orderData: CreateOrderDto = {
         userId: user.id,
@@ -131,22 +137,11 @@ export default function POSPage() {
       router.push('/orders')
       
     } catch (error: unknown) {
-      let errorMessage = 'Error desconocido'
-      
-      if (error instanceof Error) {
-        if ('response' in error && error.response && typeof error.response === 'object' && 'data' in error.response) {
-          const responseData = error.response.data as { message?: string }
-          errorMessage = responseData.message || error.message
-        } else {
-          errorMessage = error.message
-        }
-      }
-      
-      alert(`Error al crear la orden: ${errorMessage}`)
+      handleError(error, 'crear orden')
     } finally {
       setProcessing(false)
     }
-  }
+  }, [user, cart, tableNumber, notes, router, handleError, clearError])
 
   if (authLoading) {
     return (
@@ -164,27 +159,28 @@ export default function POSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="bg-orange-100 p-2 rounded-lg mr-3">
-                <Utensils className="h-6 w-6 text-orange-600" />
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <div className="bg-orange-100 p-2 rounded-lg mr-3">
+                  <Utensils className="h-6 w-6 text-orange-600" />
+                </div>
+                <h1 className="text-xl font-bold text-gray-900">Punto de Venta</h1>
               </div>
-              <h1 className="text-xl font-bold text-gray-900">Punto de Venta</h1>
+              
+              <Button
+                variant="outline"
+                onClick={() => router.push('/dashboard')}
+              >
+                Volver al Dashboard
+              </Button>
             </div>
-            
-            <Button
-              variant="outline"
-              onClick={() => router.push('/dashboard')}
-            >
-              Volver al Dashboard
-            </Button>
           </div>
-        </div>
-      </header>
+        </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -203,57 +199,12 @@ export default function POSPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {products.map((product) => (
-                      <Card key={product.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex gap-4">
-                            {/* Imagen del producto */}
-                            <div className="flex-shrink-0">
-                              {getProductImageUrl(product) ? (
-                                <div className="relative w-16 h-16 rounded-lg overflow-hidden">
-                                  <Image
-                                    src={getProductImageUrl(product)!}
-                                    alt={product.name}
-                                    fill
-                                    className="object-cover"
-                                    sizes="64px"
-                                  />
-                                </div>
-                              ) : (
-                                <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                                  <Utensils className="h-6 w-6 text-gray-400" />
-                                </div>
-                              )}
-                            </div>
-                            
-                            {/* Información del producto */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-semibold text-gray-900 truncate">{product.name}</h3>
-                                <span className="text-lg font-bold text-orange-600 ml-2">
-                                  {formatCurrency(Number(product.price))}
-                                </span>
-                              </div>
-                              {product.description && (
-                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                              )}
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs text-gray-500">
-                                  Stock: {product.stock}
-                                </span>
-                                <Button
-                                  size="sm"
-                                  onClick={() => addToCart(product)}
-                                  className="bg-orange-600 hover:bg-orange-700"
-                                >
-                                  <Plus className="h-4 w-4 mr-1" />
-                                  Agregar
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                    {availableProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onAddToCart={addToCart}
+                      />
                     ))}
                   </div>
                 )}
@@ -277,40 +228,12 @@ export default function POSPage() {
                 {/* Items del carrito */}
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                   {cart.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">{item.product.name}</h4>
-                        <p className="text-xs text-gray-600">
-                          {formatCurrency(item.unitPrice)} × {item.quantity}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="text-sm font-medium w-8 text-center">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => removeFromCart(item.product.id)}
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    </div>
+                    <CartItem
+                      key={item.id}
+                      item={item}
+                      onUpdateQuantity={updateQuantity}
+                      onRemove={removeFromCart}
+                    />
                   ))}
                 </div>
 
@@ -319,7 +242,7 @@ export default function POSPage() {
                   <div className="flex justify-between items-center text-lg font-bold">
                     <span>Total:</span>
                     <span className="text-orange-600">
-                      {formatCurrency(getTotal())}
+                      {formatCurrency(getTotal)}
                     </span>
                   </div>
                 </div>
@@ -344,14 +267,30 @@ export default function POSPage() {
                   </div>
                 </div>
 
+                {/* Manejo de errores */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-sm text-red-800">{error}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearError}
+                      className="mt-2 text-red-600 hover:text-red-700"
+                    >
+                      Cerrar
+                    </Button>
+                  </div>
+                )}
+
                 {/* Botón de crear orden */}
                 <div className="space-y-2">
                   <Button
                     className="w-full bg-orange-600 hover:bg-orange-700"
-                    onClick={() => processOrder()}
+                    onClick={processOrder}
                     disabled={cart.length === 0 || processing}
+                    aria-label="Crear nueva orden"
                   >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    <ShoppingCart className="h-4 w-4 mr-2" aria-hidden="true" />
                     Crear Orden
                   </Button>
                 </div>
@@ -368,5 +307,6 @@ export default function POSPage() {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   )
 }
