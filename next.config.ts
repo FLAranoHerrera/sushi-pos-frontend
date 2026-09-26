@@ -30,7 +30,6 @@ const nextConfig: NextConfig = {
   // Configuración para Vercel
   output: 'standalone',
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   // Headers de seguridad
