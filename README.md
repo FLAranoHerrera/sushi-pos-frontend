@@ -42,3 +42,9 @@ Abre la dirección que muestra el servidor y añade `/demo` para la demostració
 Los cobros de `/demo` son simulados y no se conservan al recargar. La aplicación conectada requiere su backend y servicios externos. No se presenta como un sistema listo para operar un restaurante; quedan pendientes validaciones completas de permisos, pagos externos y despliegue. No se han medido disponibilidad, puntuaciones de rendimiento ni conformidad integral de accesibilidad.
 
 La ruta pública `/demo` estará disponible después de integrar y desplegar estos cambios.
+
+## Dependencias de compilación
+
+Se mantiene Next.js 15.5.26 con su configuración ESLint correspondiente. El override de PostCSS aplica una corrección de la misma versión mayor (8), ya que Next 15 conserva una dependencia exacta antigua. El archivo de bloqueo fija las versiones comprobadas. Al actualizar Next, revisar si este override sigue siendo necesario.
+
+La actualización incluye las correcciones disponibles de Axios, Sharp y dependencias transitivas. La auditoría de npm no reportó vulnerabilidades al validar esta revisión; repetirla antes de publicar nuevas versiones.
