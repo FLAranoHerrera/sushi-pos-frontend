@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@/types'
+import { usePathname } from 'next/navigation'
 import { authService } from '@/services/auth.service'
 
 interface AuthContextType {
@@ -16,10 +17,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (pathname === '/demo') { setLoading(false); return }
     const initAuth = async () => {
       if (authService.isAuthenticated()) {
         try {
@@ -39,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     initAuth()
-  }, [])
+  }, [pathname])
 
   const login = async (email: string, password: string) => {
     try {

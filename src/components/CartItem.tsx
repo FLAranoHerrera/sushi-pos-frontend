@@ -47,7 +47,6 @@ const CartItem = React.memo<CartItemProps>(({ item, onUpdateQuantity, onRemove }
           onClick={handleDecrease}
           onKeyDown={(e) => handleKeyDown(e, handleDecrease)}
           aria-label={`Disminuir cantidad de ${item.product.name}`}
-          aria-label={`Disminuir cantidad de ${item.product.name}`}
         >
           <Minus className="h-3 w-3" aria-hidden="true" />
         </Button>
